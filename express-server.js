@@ -68,6 +68,17 @@ app.post("/urls", (req, res) => {
   res.send("Ok");
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+
+  if (urlDatabase[id]) {
+    delete urlDatabase[id];
+    res.redirect("/url");
+  } else {
+    res.status(404);
+  }
+});
+
 const randomString = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   let str = "";
