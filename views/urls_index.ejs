@@ -50,13 +50,16 @@
           </tr>
         </thead>
         <tbody>
-          <% for (let id in urls) { %>
+          <% for (let shortUrl in urls) { %>
           <tr>
-            <td><%= id %></td>
-            <td><%= urls[id] %></td>
+            <td><%= shortUrl %></td>
+            <td><%= urls[shortUrl] %></td>
             <td>
-              <form method="POST" action="/urls/<%= id %>/delete">
-                <!-- Form for delete action -->
+              <a href="/urls/<%= shortUrl%>">Edit</a>
+            </td>
+
+            <td>
+              <form method="POST" action="/urls/<%= shortUrl %>/delete">
                 <button type="submit" class="btn btn-danger btn-sm">
                   Delete
                 </button>

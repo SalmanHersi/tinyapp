@@ -34,7 +34,15 @@
         </div>
       </nav>
     </header>
-
+    <form method="POST" action="/urls/<%= id %>">
+      <input
+        type="text"
+        id="updatedLongURL"
+        name="updatedLongURL"
+        placeholder="Enter updated long URL"
+      />
+      <button type="submit" class="btn btn-danger btn-sm">Submit</button>
+    </form>
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">

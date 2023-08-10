@@ -79,6 +79,18 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 });
 
+app.post("/urls/:id", (req, res) => {
+  const id = req.params.id;
+  const updatedLongURL = req.body.updatedLongURL;
+
+  if (urlDatabase[id]) {
+    urlDatabase[id] = updatedLongURL;
+    res.redirect("/urls");
+  } else {
+    res.status(404);
+  }
+});
+
 const randomString = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   let str = "";
