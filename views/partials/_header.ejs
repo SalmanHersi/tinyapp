@@ -18,9 +18,15 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <form action="/login" name="username" method="POST">
-      <input type="text" placeholder="Enter Username" name="username" />
-      <button type="submit">Login</button>
+
+    <form class="form-inline" method="POST" action="/login">
+      <input
+        class="form-control mr-sm-2"
+        type="text"
+        name="username"
+        placeholder="Username"
+      />
+      <button class="btn btn-light my-2 my-sm-0" type="submit">Login</button>
     </form>
   </nav>
 </header>

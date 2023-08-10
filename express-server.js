@@ -61,13 +61,24 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
 app.post("/urls", (req, res) => {
   const templateVars = {
     longURL: urlDatabase[req.params.id],
     id: req.params.id,
   };
-  console.log(req.body);
   res.send("Ok");
+});
+
+app.get("/urls", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+    // ... other variables
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
