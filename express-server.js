@@ -37,7 +37,12 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const user = users[req.cookies.user_id];
+  if (user) {
+    res.render("urls_new", { user });
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls", (req, res) => {
@@ -46,16 +51,22 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  const user = users[req.cookies.user_id];
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
+    user: user,
   };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("Short URL not found");
+  }
 });
 
 app.get("/u/:id", (req, res) => {
@@ -70,19 +81,33 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  res.render("register");
+  const user = users[req.cookies.user_id];
+  if (user) {
+    res.redirect("/urls");
+  } else {
+    res.render("register", { user });
+  }
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  const user = users[req.cookies.user_id];
+  if (user) {
+    res.redirect("/urls");
+  } else {
+    res.render("login", { user });
+  }
 });
 
 app.post("/urls", (req, res) => {
-  const templateVars = {
-    longURL: urlDatabase[req.params.id],
-    id: req.params.id,
-  };
-  res.send("Ok");
+  const user = users[req.cookies.user_id];
+  if (user) {
+    const longURL = req.body.longURL;
+    const shortURL = randomString();
+    urlDatabase[shortURL] = longURL;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(403).send("You must be logged in to create URLs.");
+  }
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -90,9 +115,9 @@ app.post("/urls/:id/delete", (req, res) => {
 
   if (urlDatabase[id]) {
     delete urlDatabase[id];
-    res.redirect("/url");
+    res.redirect("/urls");
   } else {
-    res.status(404);
+    res.status(404).send("URL not found");
   }
 });
 
