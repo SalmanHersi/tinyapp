@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
 const PORT = 8080;
+const bcrypt = require("bcryptjs");
 
 app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -169,27 +170,6 @@ app.post("/login", (req, res) => {
   }
 
   res.cookie("user_id", user.id);
-  res.redirect("/urls");
-});
-
-app.post("/register", (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(400).send("400!!! Yikes");
-    return;
-  }
-
-  if (getUserByEmail(email)) {
-    res.status(400).send("Email already registered.");
-    return;
-  }
-  const userID = randomString();
-  users[userID] = {
-    id: userID,
-    email: email,
-    password: password,
-  };
-  res.cookie("user_id", userID);
   res.redirect("/urls");
 });
 
