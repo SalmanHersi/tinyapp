@@ -173,6 +173,27 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/register", (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(400).send("400!!! Yikes");
+    return;
+  }
+
+  if (getUserByEmail(email)) {
+    res.status(400).send("Email already registered.");
+    return;
+  }
+  const userID = randomString();
+  users[userID] = {
+    id: userID,
+    email: email,
+    password: password,
+  };
+  res.cookie("user_id", userID);
+  res.redirect("/urls");
+});
+
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
