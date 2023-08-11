@@ -1,10 +1,20 @@
 const express = require("express");
 const app = express();
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const PORT = 8080;
 const bcrypt = require("bcryptjs");
+const password = "purple-monkey-dinosaur";
+const hashedPassword = bcrypt.hashSync(password, 10);
 
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["secret-key"],
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+);
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,19 +59,22 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls", (req, res) => {
-  const user = users[req.cookies.user_id];
-
-  if (user) {
-    const userURLs = urlsForUser(user.id);
+  const userId = req.session.user_id;
+  console.log("inside /url", userId);
+  const user = users[userId];
+  console.log("inside /url 2", user); // Retrieve user data from the session
+  if (userId) {
+    const userURLs = urlsForUser(userId);
     const templateVars = { urls: userURLs, user: user };
+    console.log(templateVars); // Pass user data to the template
     res.render("urls_index", templateVars);
   } else {
-    res.redirect("/login");
+    res.redirect("login");
   }
 });
 
 app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   if (user) {
     res.render("urls_new", { user });
   } else {
@@ -70,7 +83,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   const shortURL = req.params.id;
   const url = urlDatabase[shortURL];
 
@@ -98,25 +111,25 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   if (user) {
     res.redirect("/urls");
   } else {
     res.render("register", { user: null });
   }
 });
-
 app.get("/login", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
+  console.log("After login", user);
   if (user) {
     res.redirect("/urls");
   } else {
-    res.render("login", { user: null });
+    res.render("login", { user }); // Pass user data to the template
   }
 });
 
 app.post("/urls", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   if (user) {
     const longURL = req.body.longURL;
     const shortURL = randomString();
@@ -131,7 +144,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   const shortURL = req.params.id;
 
   if (!user) {
@@ -145,7 +158,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   const shortURL = req.params.id;
   const updatedLongURL = req.body.updatedLongURL;
 
@@ -165,11 +178,12 @@ app.post("/login", (req, res) => {
 
   const user = getUserByEmail(email);
 
-  if (!user || user.password !== password) {
+  if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Invalid email or password");
   }
 
-  res.cookie("user_id", user.id);
+  req.session["user_id"] = user.id;
+  console.log("after login", user.id); // Set user_id in the session
   res.redirect("/urls");
 });
 
@@ -184,18 +198,21 @@ app.post("/register", (req, res) => {
     res.status(400).send("Email already registered.");
     return;
   }
+
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   const userID = randomString();
   users[userID] = {
     id: userID,
     email: email,
-    password: password,
+    password: hashedPassword,
   };
-  res.cookie("user_id", userID);
+  req.session["user_id"] = userID;
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session["user_id"] = null;
   res.redirect("/login");
 });
 
