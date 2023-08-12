@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-// const cookieParser = require("cookie-parser");
+const { getUserByEmail } = require("./helpers");
 const cookieSession = require("cookie-session");
 const PORT = 8080;
 const bcrypt = require("bcryptjs");
@@ -31,15 +31,6 @@ const urlDatabase = {
 
 const users = {};
 
-const getUserByEmail = (email) => {
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return users[userId];
-    }
-  }
-  return null;
-};
-
 const urlsForUser = (id) => {
   const userURLs = {};
   for (const shortURL in urlDatabase) {
@@ -48,6 +39,19 @@ const urlsForUser = (id) => {
     }
   }
   return userURLs;
+};
+
+const randomString = () => {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
+  let str = "";
+
+  for (let i = 0; i < 6; i++) {
+    const index = Math.floor(Math.random() * chars.length);
+    str = str + chars.charAt(index);
+  }
+
+  return str;
 };
 
 app.get("/", (req, res) => {
@@ -176,7 +180,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Invalid email or password");
@@ -186,7 +190,6 @@ app.post("/login", (req, res) => {
   console.log("after login", user.id); // Set user_id in the session
   res.redirect("/urls");
 });
-
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -194,7 +197,7 @@ app.post("/register", (req, res) => {
     return;
   }
 
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
     res.status(400).send("Email already registered.");
     return;
   }
@@ -215,15 +218,3 @@ app.post("/logout", (req, res) => {
   req.session["user_id"] = null;
   res.redirect("/login");
 });
-
-const randomString = () => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  let str = "";
-
-  for (let i = 0; i < 6; i++) {
-    const index = Math.floor(Math.random() * chars.length);
-    str = str + chars.charAt(index);
-  }
-
-  return str;
-};
