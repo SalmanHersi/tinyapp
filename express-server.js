@@ -64,13 +64,13 @@ app.listen(PORT, () => {
 
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
-  console.log("inside /url", userId);
+
   const user = users[userId];
-  console.log("inside /url 2", user); // Retrieve user data from the session
+
   if (userId) {
     const userURLs = urlsForUser(userId);
     const templateVars = { urls: userURLs, user: user };
-    console.log(templateVars); // Pass user data to the template
+
     res.render("urls_index", templateVars);
   } else {
     res.redirect("login");
@@ -124,7 +124,7 @@ app.get("/register", (req, res) => {
 });
 app.get("/login", (req, res) => {
   const user = users[req.session.user_id];
-  console.log("After login", user);
+
   if (user) {
     res.redirect("/urls");
   } else {
@@ -187,7 +187,7 @@ app.post("/login", (req, res) => {
   }
 
   req.session["user_id"] = user.id;
-  console.log("after login", user.id); // Set user_id in the session
+
   res.redirect("/urls");
 });
 app.post("/register", (req, res) => {
