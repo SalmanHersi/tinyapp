@@ -1,11 +1,17 @@
 const express = require("express");
 const app = express();
-const { getUserByEmail } = require("./helpers");
+const {
+  getUserByEmail,
+  urlsForUser,
+  randomString,
+  checkHttps,
+} = require("./helpers");
+const { users, urlDatabase } = require("./database");
 const cookieSession = require("cookie-session");
 const PORT = 8080;
 const bcrypt = require("bcryptjs");
-const password = "purple-monkey-dinosaur";
-const hashedPassword = bcrypt.hashSync(password, 10);
+
+// BackEnd Code
 
 app.use(
   cookieSession({
@@ -17,66 +23,6 @@ app.use(
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
-const urlDatabase = {
-  b2xVn2: {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID",
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "userRandomID",
-  },
-};
-
-const users = {};
-
-// Helper Functions
-
-// Function to retrieve URLs associated with a specific user ID from the URL database
-const urlsForUser = (id) => {
-  const userURLs = {}; // Initialize an empty object to store user-specific URLs
-
-  // Iterate through each shortURL in the URL database
-  for (const shortURL in urlDatabase) {
-    // Check if the userID associated with the shortURL matches the provided id
-    if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL]; // Add the URL entry to userURLs
-    }
-  }
-
-  return userURLs; // Return the object containing user-specific URLs
-};
-
-// Function to generate a random string of specified length using a given set of characters
-const randomString = () => {
-  // Set of characters that can be used in the random string
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
-
-  let str = ""; // Initialize an empty string to store the random string
-
-  // Generate a random string of length 6
-  for (let i = 0; i < 6; i++) {
-    const index = Math.floor(Math.random() * chars.length); // Generate a random index
-    str = str + chars.charAt(index); // Add the character at the random index to the string
-  }
-
-  return str; // Return the generated random string
-};
-
-// Function to ensure URLs have a valid HTTP or HTTPS prefix
-const checkHttps = (url) => {
-  // Check if the URL starts with "https://" or "http://"
-  if (url.startsWith("https://") || url.startsWith("http://")) {
-    return url; // Return the original URL
-  }
-
-  // If the URL doesn't have a prefix, add "http://" as the default
-  return `http://${url}`;
-};
-
-// Backend Code
-
 app.get("/", (req, res) => {
   const userId = req.session.user_id;
 
@@ -85,10 +31,6 @@ app.get("/", (req, res) => {
   } else {
     res.render("login", { user: null });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
 });
 
 app.get("/urls", (req, res) => {
@@ -246,4 +188,8 @@ app.post("/register", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/login");
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
