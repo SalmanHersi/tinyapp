@@ -63,17 +63,17 @@ app.listen(PORT, () => {
 
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
-
   const user = users[userId];
 
-  if (userId) {
-    const userURLs = urlsForUser(userId);
-    const templateVars = { urls: userURLs, user: user };
-
-    res.render("urls_index", templateVars);
-  } else {
-    res.redirect("login");
+  if (!user) {
+    const errorMessage = "You must be logged in to view this page.";
+    res.status(401).send(errorMessage);
+    return;
   }
+
+  const userURLs = urlsForUser(userId);
+  const templateVars = { urls: userURLs, user: user };
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
