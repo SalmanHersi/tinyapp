@@ -30,37 +30,59 @@ const urlDatabase = {
 
 const users = {};
 
+// Helper Functions
+
+// Function to retrieve URLs associated with a specific user ID from the URL database
 const urlsForUser = (id) => {
-  const userURLs = {};
+  const userURLs = {}; // Initialize an empty object to store user-specific URLs
+
+  // Iterate through each shortURL in the URL database
   for (const shortURL in urlDatabase) {
+    // Check if the userID associated with the shortURL matches the provided id
     if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL];
+      userURLs[shortURL] = urlDatabase[shortURL]; // Add the URL entry to userURLs
     }
   }
-  return userURLs;
+
+  return userURLs; // Return the object containing user-specific URLs
 };
 
+// Function to generate a random string of specified length using a given set of characters
 const randomString = () => {
+  // Set of characters that can be used in the random string
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
-  let str = "";
 
+  let str = ""; // Initialize an empty string to store the random string
+
+  // Generate a random string of length 6
   for (let i = 0; i < 6; i++) {
-    const index = Math.floor(Math.random() * chars.length);
-    str = str + chars.charAt(index);
+    const index = Math.floor(Math.random() * chars.length); // Generate a random index
+    str = str + chars.charAt(index); // Add the character at the random index to the string
   }
 
-  return str;
+  return str; // Return the generated random string
 };
+
+// Function to ensure URLs have a valid HTTP or HTTPS prefix
+const checkHttps = (url) => {
+  // Check if the URL starts with "https://" or "http://"
+  if (url.startsWith("https://") || url.startsWith("http://")) {
+    return url; // Return the original URL
+  }
+
+  // If the URL doesn't have a prefix, add "http://" as the default
+  return `http://${url}`;
+};
+
+// Backend Code
 
 app.get("/", (req, res) => {
   const userId = req.session.user_id;
 
   if (userId) {
-    // User is logged in, redirect to /urls
     res.redirect("/urls");
   } else {
-    // User is not logged in, render the login/register page
     res.render("login", { user: null });
   }
 });
@@ -111,13 +133,6 @@ app.get("/urls/:id", (req, res) => {
     res.render("urls_show", templateVars);
   }
 });
-// Fucntion that checks if user inputted https prefix or not
-const checkHttps = (url) => {
-  if (url.startsWith("https://") || url.startsWith("http://")) {
-    return url;
-  }
-  return `http://${url}`;
-};
 
 app.get("/u/:id", (req, res) => {
   const urlObject = urlDatabase[req.params.id];
