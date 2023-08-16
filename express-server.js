@@ -7,7 +7,6 @@ const bcrypt = require("bcryptjs");
 const password = "purple-monkey-dinosaur";
 const hashedPassword = bcrypt.hashSync(password, 10);
 
-// app.use(cookieParser());
 app.use(
   cookieSession({
     name: "session",
@@ -128,7 +127,7 @@ app.get("/login", (req, res) => {
   if (user) {
     res.redirect("/urls");
   } else {
-    res.render("login", { user }); // Pass user data to the template
+    res.render("login", { user });
   }
 });
 
@@ -215,6 +214,6 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  req.session["user_id"] = null;
+  req.session = null;
   res.redirect("/login");
 });
