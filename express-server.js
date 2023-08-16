@@ -54,7 +54,15 @@ const randomString = () => {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const userId = req.session.user_id;
+
+  if (userId) {
+    // User is logged in, redirect to /urls
+    res.redirect("/urls");
+  } else {
+    // User is not logged in, render the login/register page
+    res.render("login", { user: null });
+  }
 });
 
 app.listen(PORT, () => {
@@ -103,11 +111,18 @@ app.get("/urls/:id", (req, res) => {
     res.render("urls_show", templateVars);
   }
 });
+// Fucntion that checks if user inputted https prefix or not
+const checkHttps = (url) => {
+  if (url.startsWith("https://") || url.startsWith("http://")) {
+    return url;
+  }
+  return `http://${url}`;
+};
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  if (longURL) {
-    res.redirect(longURL.longURL);
+  const urlObject = urlDatabase[req.params.id];
+  if (urlObject) {
+    res.redirect(checkHttps(urlObject.longURL));
   } else {
     res.status(404).send("URL not found");
   }
